@@ -1,0 +1,253 @@
+{
+  "name": "LinkedIn 30-Day AI Post Creator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "39622a7b-7634-45f1-91fb-7865f0b77060",
+      "name": "Daily 9 AM IST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const topics = [\n  'AI Agents',\n  'RAG',\n  'Embeddings',\n  'Vector Databases',\n  'Prompt Engineering',\n  'LLM Context Windows',\n  'AI Hallucinations',\n  'Function Calling',\n  'Tool Calling',\n  'AI Agent Memory',\n  'Multi-Agent Systems',\n  'AI Evaluation',\n  'Fine-Tuning',\n  'LoRA',\n  'AI APIs',\n  'AI Automation',\n  'n8n AI Agents',\n  'Webhooks + AI',\n  'AI Workflows',\n  'Computer Vision',\n  'Multimodal AI',\n  'AI Security',\n  'Prompt Injection',\n  'RAG Security',\n  'AI Cost Optimization',\n  'LLM Latency',\n  'Open-Source LLMs',\n  'AI Coding Assistants',\n  'AI in Software Development',\n  'The Future of Agentic AI'\n];\n\n// Campaign starts on 2026-09-03 (Day 1)\nconst startDate = new Date('2026-09-03T00:00:00.000Z');\nconst today = new Date();\ntoday.setUTCHours(0, 0, 0, 0);\n\nconst diffMs = today.getTime() - startDate.getTime();\nconst dayNumber = Math.floor(diffMs / (24 * 60 * 60 * 1000)) + 1;\n\n// Outside the 30-day window — stop the workflow\nif (dayNumber < 1 || dayNumber > 30) {\n  return [];\n}\n\nconst topic = topics[dayNumber - 1];\nreturn [{ json: { dayNumber, topic } }];"
+      },
+      "id": "b225c93b-cfcb-420b-abbd-b7fe589fac11",
+      "name": "Compute Day & Topic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatModel": "gpt-4o-mini",
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are an expert LinkedIn content creator specialising in AI topics. Write engaging posts that educate professionals, spark curiosity, and drive real engagement. Each post must:\n- Be 150-300 words\n- Open with a compelling hook (bold statement, surprising fact, or rhetorical question)\n- Provide concise, practical insights with real-world context\n- Use short paragraphs for mobile readability\n- End with a thought-provoking question to invite comments\n- Include 3-5 relevant hashtags on a final line\n- Maintain a professional yet conversational tone"
+            },
+            {
+              "content": "=Write a LinkedIn post about \"{{ $json.topic }}\" — this is Day {{ $json.dayNumber }} of a 30 Days of AI series. Make it informative, engaging, and valuable for AI professionals and enthusiasts."
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "id": "9e34f2b4-670f-4645-be0b-3b3243517f46",
+      "name": "Generate LinkedIn Post",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "jillasrivardhan@gmail.com",
+        "subject": "=✅ Approve LinkedIn Post — Day {{ $(\"Compute Day & Topic\").item.json.dayNumber }}: {{ $(\"Compute Day & Topic\").item.json.topic }}",
+        "message": "=<h2>Day {{ $(\"Compute Day & Topic\").item.json.dayNumber }} of 30 — {{ $(\"Compute Day & Topic\").item.json.topic }}</h2>\n<p>Here is today's AI-generated LinkedIn post. Please review and approve or decline:</p>\n<hr/>\n<pre style=\"white-space:pre-wrap;font-family:sans-serif;font-size:14px;\">{{ $json.message.content }}</pre>\n<hr/>\n<p>Click <strong>Approve</strong> to publish immediately to LinkedIn, or <strong>Decline</strong> to skip today's post.</p>",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve & Post"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 23
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "c59fccfc-6385-4e1d-84da-7b35e246b021",
+      "name": "Send for Approval",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        0
+      ],
+      "webhookId": "a052846a-acb3-455b-bf59-aa2a8aee211c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DP8CGTZtFEZEJKiv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "approval-check",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "92488537-0b11-495f-a9d9-84d1dde575ce",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "person": "uZhV3E6CA4",
+        "text": "={{ $('Generate LinkedIn Post').item.json.message.content }}",
+        "additionalFields": {
+          "visibility": "PUBLIC"
+        }
+      },
+      "id": "e2d4bb84-2758-4dfb-9e2a-518d1c4f433f",
+      "name": "Post to LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        -96
+      ],
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "DYadteVHF2FqDjwf",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "0adc95d1-fe89-4e71-934a-c974b91783ce",
+      "name": "Post Skipped",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 9 AM IST": {
+      "main": [
+        [
+          {
+            "node": "Compute Day & Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Day & Topic": {
+      "main": [
+        [
+          {
+            "node": "Generate LinkedIn Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "Send for Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send for Approval": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Post to LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Post Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a4a86870-f22d-44bc-a125-c2a6c9a233c1",
+  "meta": {
+    "instanceId": "fd1d02cbf9724d82613ba1c960f0ffa9ea407bc89b3e526abca9e010509abee1"
+  },
+  "nodeGroups": [],
+  "id": "h9EIUYWjGqvQbJGA",
+  "tags": []
+}
