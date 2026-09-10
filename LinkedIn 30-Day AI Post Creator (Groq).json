@@ -1,0 +1,396 @@
+{
+  "name": "LinkedIn 30-Day AI Post Creator (Groq)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "39622a7b-7634-45f1-91fb-7865f0b77060",
+      "name": "Daily 9 AM IST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const topics = [\n  'AI Agents',\n  'RAG',\n  'Embeddings',\n  'Vector Databases',\n  'Prompt Engineering',\n  'LLM Context Windows',\n  'AI Hallucinations',\n  'Function Calling',\n  'Tool Calling',\n  'AI Agent Memory',\n  'Multi-Agent Systems',\n  'AI Evaluation',\n  'Fine-Tuning',\n  'LoRA',\n  'AI APIs',\n  'AI Automation',\n  'n8n AI Agents',\n  'Webhooks + AI',\n  'AI Workflows',\n  'Computer Vision',\n  'Multimodal AI',\n  'AI Security',\n  'Prompt Injection',\n  'RAG Security',\n  'AI Cost Optimization',\n  'LLM Latency',\n  'Open-Source LLMs',\n  'AI Coding Assistants',\n  'AI in Software Development',\n  'The Future of Agentic AI'\n];\n\n// Campaign starts on 2026-09-03 (Day 1)\nconst startDate = new Date('2026-09-03T00:00:00.000Z');\nconst today = new Date();\ntoday.setUTCHours(0, 0, 0, 0);\n\nconst diffMs = today.getTime() - startDate.getTime();\nconst dayNumber = Math.floor(diffMs / (24 * 60 * 60 * 1000)) + 1;\n\n// Outside the 30-day window — stop the workflow\nif (dayNumber < 1 || dayNumber > 30) {\n  return [];\n}\n\nconst topic = topics[dayNumber - 1];\nreturn [{ json: { dayNumber, topic } }];"
+      },
+      "id": "b225c93b-cfcb-420b-abbd-b7fe589fac11",
+      "name": "Compute Day & Topic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a professional and engaging LinkedIn post about \"{{ $json.topic }}\".\n\n📅 This is **Day {{ $json.dayNumber }} of my 30 Days AI Topic Series**.\n\nStart the post with:\n\n🚀 **DAY {{ $json.dayNumber }} — 30 DAYS AI TOPIC SERIES**\n\n🔥 **{{ $json.topic }}**\n\nThen:\n\n1. Start with a strong curiosity-driven hook.\n2. Explain the topic in simple terms.\n3. Explain how it works.\n4. Explain the important concepts/components.\n5. Give a simple real-world example.\n6. Mention practical applications.\n7. Mention key benefits.\n8. End with a short **💡 Key Takeaway**.\n\nFormatting requirements:\n- Use emojis naturally.\n- Use **bold text** to highlight important headings and concepts.\n- Use bullet points where appropriate.\n- Keep paragraphs short.\n- Make it visually attractive and easy to scan on LinkedIn.\n- Keep the tone professional, educational, and engaging.\n- Explain technical concepts so that beginners can understand them.\n- Avoid unnecessary jargon.\n- Do not use markdown code blocks.\n- Do not mention that AI generated the post.\n\nFinish with 5–8 relevant hashtags.\n\nThe final output should contain ONLY the LinkedIn post.",
+        "options": {
+          "systemMessage": "You are a helpful aYou are an expert LinkedIn content creator specialising in AI topics. Write engaging posts that educate professionals, spark curiosity, and drive real engagement. Each post must:\n- Be 150-300 words\n- Open with a compelling hook (bold statement, surprising fact, or rhetorical question)\n- Provide concise, practical insights with real-world context\n- Use short paragraphs for mobile readability\n- End with a thought-provoking question to invite comments\n- Include 3-5 relevant hashtags on a final line\n- Maintain a professional yet conversational tonessistant"
+        }
+      },
+      "id": "db766976-7fa4-46e3-9e17-d5bfe8b06034",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "jillasrivardhan@gmail.com",
+        "subject": "=✅ Approve LinkedIn Post — Day {{ $('Compute Day & Topic').item.json.dayNumber }}: {{ $('Compute Day & Topic').item.json.topic }}",
+        "message": "=<h2>Day {{ $('Compute Day & Topic').item.json.dayNumber }} of 30 — {{ $('Compute Day & Topic').item.json.topic }}</h2>\n<p>Here is today's AI-generated LinkedIn post. Please review and approve or decline:</p>\n<hr/>\n<pre style=\"white-space:pre-wrap;font-family:sans-serif;font-size:14px;\">{{ $('AI Agent').item.json.output }}</pre>\n<hr/>\n<p>Click <strong>Approve</strong> to publish immediately to LinkedIn, or <strong>Decline</strong> to skip today's post.</p>",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve & Post"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 23
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "c59fccfc-6385-4e1d-84da-7b35e246b021",
+      "name": "Send for Approval",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        144
+      ],
+      "webhookId": "75e9a1b9-fee0-4e29-a164-ffeb1af86eff",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "f1ZHcJSfyIxjTdHK",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "approval-check",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "92488537-0b11-495f-a9d9-84d1dde575ce",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "person": "uZhV3E6CA4",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "additionalFields": {
+          "visibility": "PUBLIC"
+        }
+      },
+      "id": "e2d4bb84-2758-4dfb-9e2a-518d1c4f433f",
+      "name": "Post to LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        0
+      ],
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "DYadteVHF2FqDjwf",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a professional and engaging LinkedIn post about \"{{ $('Compute Day & Topic').item.json.topic }}\".\n\n📅 This is **Day {{ $('Compute Day & Topic').item.json.dayNumber }} of my 30 Days AI Topic Series**.\n\nStart the post with:\n\n🚀 **DAY {{ $('Compute Day & Topic').item.json.dayNumber }} — 30 DAYS AI TOPIC SERIES**\n\n🔥 **{{ $('Compute Day & Topic').item.json.topic }}**\n\nThen:\n\n1. Start with a strong curiosity-driven hook.\n2. Explain the topic in simple terms.\n3. Explain how it works.\n4. Explain the important concepts/components.\n5. Give a simple real-world example.\n6. Mention practical applications.\n7. Mention key benefits.\n8. End with a short 💡 Key Takeaway.\n\nFormatting requirements:\n- Use emojis naturally.\n- Use **bold text** to highlight important headings and concepts.\n- Use bullet points where appropriate.\n- Keep paragraphs short.\n- Make it visually attractive and easy to scan on LinkedIn.\n- Keep the tone professional, educational, and engaging.\n- Explain technical concepts so that beginners can understand them.\n- Avoid unnecessary jargon.\n- Do not use markdown code blocks.\n- Do not mention that AI generated the post.\n\nFinish with 5–8 relevant hashtags.\n\nThe final output should contain ONLY the LinkedIn post.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert LinkedIn content creator specialising in AI topics. Write engaging posts that educate professionals, spark curiosity, and drive real engagement. Each post must:\n- Be 150-300 words\n- Open with a compelling hook (bold statement, surprising fact, or rhetorical question)\n- Provide concise, practical insights with real-world context\n- Use short paragraphs for mobile readability\n- End with a thought-provoking question to invite comments\n- Include 3-5 relevant hashtags on a final line\n- Maintain a professional yet conversational tone"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "39373ea1-c701-4b5d-b280-d786839486de",
+      "name": "Regenerate LinkedIn Post",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1248,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5"
+        },
+        "options": {}
+      },
+      "id": "c7f09f52-8e3c-4df8-8b14-7bf7dec64882",
+      "name": "Claude Sonnet 5 (Regen)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        1328,
+        528
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "jillasrivardhan@gmail.com",
+        "subject": "=✅ Approve LinkedIn Post — Day {{ $('Compute Day & Topic').item.json.dayNumber }}: {{ $('Compute Day & Topic').item.json.topic }}",
+        "message": "=<h2>Day {{ $('Compute Day & Topic').item.json.dayNumber }} of 30 — {{ $('Compute Day & Topic').item.json.topic }}</h2>\n<p>Here is today's AI-generated LinkedIn post. Please review and approve or decline:</p>\n<hr/>\n<pre style=\"white-space:pre-wrap;font-family:sans-serif;font-size:14px;\">{{ $json.text }}</pre>\n<hr/>\n<p>Click <strong>Approve</strong> to publish immediately to LinkedIn, or <strong>Decline</strong> to skip today's post.</p>",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve & Post"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 23
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "c60f60da-2481-4d90-a98f-d069ced06f27",
+      "name": "Send for Approval1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        304
+      ],
+      "webhookId": "f691952e-e9fe-4b63-b95a-7fb3a2438c2b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DP8CGTZtFEZEJKiv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "person": "uZhV3E6CA4",
+        "text": "={{ $('Regenerate LinkedIn Post').item.json.text }}",
+        "additionalFields": {
+          "visibility": "PUBLIC"
+        }
+      },
+      "id": "b9162832-3171-47c6-9b2f-06ffdf9e71af",
+      "name": "Post to LinkedIn1",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        304
+      ],
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "DYadteVHF2FqDjwf",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        352
+      ],
+      "id": "73feb283-7d7e-4619-8cdf-db8db3fc895a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kV0XB9U9zcGxT5cq",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 9 AM IST": {
+      "main": [
+        [
+          {
+            "node": "Compute Day & Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Day & Topic": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send for Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send for Approval": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Post to LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Regenerate LinkedIn Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Regenerate LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "Send for Approval1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Sonnet 5 (Regen)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Regenerate LinkedIn Post",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send for Approval1": {
+      "main": [
+        [
+          {
+            "node": "Post to LinkedIn1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2d343463-262b-4ce0-a57a-78ef03af7657",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fd1d02cbf9724d82613ba1c960f0ffa9ea407bc89b3e526abca9e010509abee1"
+  },
+  "nodeGroups": [],
+  "id": "FZBL62hScuWv0tow",
+  "tags": []
+}
